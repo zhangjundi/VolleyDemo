@@ -3,6 +3,9 @@ package demo.zjd.com.volleydemo.net;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -25,8 +28,17 @@ public class HttpTask<T> implements Runnable {
     @Override
     public void run() {
         OkHttpClient client = new OkHttpClient.Builder().build();
-//        new Request.Builder().build().url(mRequestHolder.getUrl());
         Request.Builder builder = new Request.Builder();
+//        builder.header()
+        Map<String, String> getheaders = mRequestHolder.getmIHttpService().getheaders();
+        if(getheaders!=null){
+            Set<Map.Entry<String, String>> entries = getheaders.entrySet();
+            Iterator<Map.Entry<String, String>> iterator = entries.iterator();
+            while(iterator.hasNext()){
+                Map.Entry<String, String> entry = iterator.next();
+                builder.header(entry.getKey(),entry.getValue());
+            }
+        }
         Gson gson=new Gson();
         builder.url(mRequestHolder.getUrl());
         if(mRequestHolder.getRequest()!=null){
@@ -35,7 +47,6 @@ public class HttpTask<T> implements Runnable {
         }
         try {
             Response response = client.newCall(builder.build()).execute();
-//            MyResposen myResposen=new MyResposen();
             if(response!=null&&(response.code()==200||response.code()==304)) {
                 mRequestHolder.getmIhttpListener().success(response);
             }else
